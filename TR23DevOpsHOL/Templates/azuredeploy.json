@@ -108,7 +108,7 @@
     "storageAccountType": "Standard_GRS",
     "publicIPAddressType": "Dynamic",
     "vmStorageAccountContainerName": "vhds",
-    "vmSize": "Standard_DS1",
+    "vmSize": "Standard_A1",
     "virtualNetworkName": "[concat(variables('baseHolName'), 'VNET')]",
     "resourceId": "[resourceGroup().id]",
     "vnetID": "[resourceId('Microsoft.Network/virtualNetworks',variables('virtualNetworkName'))]",
