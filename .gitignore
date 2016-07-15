@@ -243,3 +243,4 @@ ModelManifest.xml
 
 # FAKE - F# Make
 .fake/
+/TR23DevOpsHOL/Templates/azuredeploy.dev.json

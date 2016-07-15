@@ -96,6 +96,10 @@
     "windowsVm2Dsc": "windowsVm2NameDsc",
     "windowsVm2DscArchiveFolder": "DSC",
     "windowsVm2DscArchiveFileName": "[variables('windowsVm2Dsc').zip",
+    "windowsVm3Name": "[concat(variables('baseHolName'), variables('baseWindowsName'), '3')]",
+    "windowsVm3OSDiskName": "[concat(variables('baseWindowsName'), variables('windowsVm3Name'), 'OS')]",
+    "windowsVm3NicName": "[concat(variables('baseWindowsName'), variables('windowsVm3Name'), 'NIC')]",
+    "windowsVm3PublicIPAddressName": "[concat(variables('baseWindowsName'), variables('windowsVm3Name'), 'PIP')]",
     "linuxVm1Name": "[concat(variables('baseHolName'), variables('baseLinuxName'), '1')]",
     "linuxImagePublisher": "Canonical",
     "linuxImageOffer": "UbuntuServer",
@@ -468,7 +472,7 @@
             "settings": {
               "configuration": {
                 "url": "[concat(parameters('_artifactsLocation'), '/', variables('windowsVm2DscArchiveFolder'), '/', variables('windowsVm2DscArchiveFileName'))]",
-                "script": "[variables('windowsVm2Dsc').ps1",
+                "script": "[concat(variables('windowsVm2Dsc'), '.ps1')]",
                 "function": "Main"
               },
               "configurationArguments": {
@@ -481,6 +485,89 @@
           }
         }
       ]
+    },
+    {
+      "name": "[variables('windowsVm3NicName')]",
+      "type": "Microsoft.Network/networkInterfaces",
+      "location": "[resourceGroup().location]",
+      "apiVersion": "2015-06-15",
+      "dependsOn": [
+        "[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]"
+      ],
+      "tags": {
+        "displayName": "[variables('windowsVm3NicName')]"
+      },
+      "properties": {
+        "ipConfigurations": [
+          {
+            "name": "ipconfig1",
+            "properties": {
+              "privateIPAllocationMethod": "Dynamic",
+              "subnet": {
+                "id": "[variables('subnetRef')]"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "[variables('apiVersion')]",
+      "type": "Microsoft.Network/publicIPAddresses",
+      "name": "[variables('windowsVm3PublicIPAddressName')]",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "publicIPAllocationMethod": "[variables('publicIPAddressType')]",
+        "dnsSettings": {
+          "domainNameLabel": "[toLower(concat(variables('windowsVm3Name'), parameters('dnsLabelPrefix')))]"
+        }
+      }
+    },
+    {
+      "name": "[variables('windowsVm3Name')]",
+      "type": "Microsoft.Compute/virtualMachines",
+      "location": "[resourceGroup().location]",
+      "apiVersion": "2015-06-15",
+      "dependsOn": [
+        "[concat('Microsoft.Storage/storageAccounts/', variables('storageAccountName'))]",
+        "[concat('Microsoft.Network/networkInterfaces/', variables('windowsVm3NicName'))]"
+      ],
+      "tags": {
+        "displayName": "VM3"
+      },
+      "properties": {
+        "hardwareProfile": {
+          "vmSize": "[variables('VmSize')]"
+        },
+        "osProfile": {
+          "computerName": "[variables('windowsVm3Name')]",
+          "adminUsername": "[parameters('adminUserName')]",
+          "adminPassword": "[parameters('adminPassword')]"
+        },
+        "storageProfile": {
+          "imageReference": {
+            "publisher": "[variables('windowsImagePublisher')]",
+            "offer": "[variables('windowsImageOffer')]",
+            "sku": "[parameters('windowsOSVersion')]",
+            "version": "latest"
+          },
+          "osDisk": {
+            "name": "[variables('windowsVm3OSDiskName')]",
+            "vhd": {
+              "uri": "[concat('http://',variables('storageAccountName'),'.blob.core.windows.net/',variables('vmStorageAccountContainerName'),'/',variables('windowsVm3OSDiskName'),'.vhd')]"
+            },
+            "caching": "ReadWrite",
+            "createOption": "FromImage"
+          }
+        },
+        "networkProfile": {
+          "networkInterfaces": [
+            {
+              "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('windowsVm3NicName'))]"
+            }
+          ]
+        }
+      }
     }
   ]
 }

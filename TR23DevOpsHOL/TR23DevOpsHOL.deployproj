@@ -32,6 +32,7 @@
     <Content Include="Templates\azuredeploy.json" />
     <Content Include="Templates\azuredeploy.parameters.json" />
     <Content Include="DSC\windowsVm2Dsc.ps1" />
+    <None Include="Templates\azuredeploy.dev.json" />
   </ItemGroup>
   <Target Name="GetReferenceAssemblyPaths" />
 </Project>
