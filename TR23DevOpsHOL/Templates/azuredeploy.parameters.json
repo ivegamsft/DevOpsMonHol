@@ -1,0 +1,27 @@
+﻿{
+  $schema: "http://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+  contentVersion: "1.0.0.0",
+  parameters: {
+    "adminUserName": {
+      "value": "omsadminuser"
+    },
+    "adminPassword": {
+      "value": "Oms@dminH0L1"
+    },
+    "dnsLabelPrefix": {
+      "value": "monhol"
+    },
+    "windowsOSVersion": {
+      "value": "2012-R2-Datacenter"
+    },
+    "ubuntuOSVersion": {
+      "value": "14.04.2-LTS"
+    },
+    "workspaceId": {
+      "value": "78ee699f-7b3b-40f2-a331-4cd187ad943d"
+    },
+    "workspaceKey": {
+      "value": "P9IQDyoNedCf1i8XS9Du8vpskJSmixtLw5u7O9O/zHeD0Uv+1BP2Fg3iqe6+jARgO77ic5nJHF1MKcTcjrpoQg=="
+    }
+  }
+}
