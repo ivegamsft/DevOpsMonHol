@@ -18,10 +18,10 @@
       "value": "14.04.2-LTS"
     },
     "workspaceId": {
-      "value": "YOUR WORKSPACE ID"
+      "value": "ENTER YOUR WORKSPACE ID"
     },
     "workspaceKey": {
-      "value": "YOUR WORKSPACE KEY"
+      "value": "ENTER YOUR WORKSPACE KEY"
     }
   }
 }
