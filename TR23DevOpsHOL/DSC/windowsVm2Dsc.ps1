@@ -7,7 +7,6 @@ Import-DscResource -ModuleName PSDesiredStateConfiguration
 
 Node $nodeName
   {
-   <# This commented section represents an example configuration that can be updated as required.
     WindowsFeature WebServerRole
     {
       Name = "Web-Server"
@@ -96,6 +95,6 @@ Node $nodeName
         StartupType = "Automatic"
         State = "Running"
         DependsOn = "[Package]InstallWebDeploy"
-    } #>
+    }
   }
 }
