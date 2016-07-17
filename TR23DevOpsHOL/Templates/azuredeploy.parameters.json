@@ -22,6 +22,12 @@
     },
     "workspaceKey": {
       "value": "ENTER YOUR WORKSPACE KEY"
+    },
+    "windowsVm2DscUpdateTagVersion": {
+      "value": "1.0"
+    },
+    "windowsVm3DscUpdateTagVersion": {
+      "value": "1.0"
     }
   }
 }

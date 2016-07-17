@@ -64,6 +64,13 @@
         "description": "This value must be changed from a previous deployment to ensure the extension will run"
       }
     },
+    "windowsVm3DscUpdateTagVersion": {
+      "type": "string",
+      "defaultValue": "1.0",
+      "metadata": {
+        "description": "This value must be changed from a previous deployment to ensure the extension will run"
+      }
+    },
     "_artifactsLocation": {
       "type": "string",
       "metadata": {
@@ -93,13 +100,16 @@
     "windowsVm2OSDiskName": "[concat(variables('baseWindowsName'), variables('windowsVm2Name'), 'OS')]",
     "windowsVm2NicName": "[concat(variables('baseWindowsName'), variables('windowsVm2Name'), 'NIC')]",
     "windowsVm2PublicIPAddressName": "[concat(variables('baseWindowsName'), variables('windowsVm2Name'),'PIP')]",
-    "windowsVm2Dsc": "windowsVm2NameDsc",
+    "windowsVm2Dsc": "windowsVm2Dsc",
     "windowsVm2DscArchiveFolder": "DSC",
-    "windowsVm2DscArchiveFileName": "[variables('windowsVm2Dsc').zip",
+    "windowsVm2DscArchiveFileName": "windowsVm2Dsc.zip",
     "windowsVm3Name": "[concat(variables('baseHolName'), variables('baseWindowsName'), '3')]",
     "windowsVm3OSDiskName": "[concat(variables('baseWindowsName'), variables('windowsVm3Name'), 'OS')]",
     "windowsVm3NicName": "[concat(variables('baseWindowsName'), variables('windowsVm3Name'), 'NIC')]",
     "windowsVm3PublicIPAddressName": "[concat(variables('baseWindowsName'), variables('windowsVm3Name'), 'PIP')]",
+    "windowsVm3Dsc": "windowsVm3Dsc",
+    "windowsVm3DscArchiveFolder": "DSC",
+    "windowsVm3DscArchiveFileName": "windowsVm3Dsc.zip",
     "linuxVm1Name": "[concat(variables('baseHolName'), variables('baseLinuxName'), '1')]",
     "linuxImagePublisher": "Canonical",
     "linuxImageOffer": "UbuntuServer",
@@ -334,7 +344,7 @@
         "networkProfile": {
           "networkInterfaces": [
             {
-              "id": "[resourceId('Microsoft.Network/networkInterfaces',variables('linuxVm1Name'))]"
+              "id": "[resourceId('Microsoft.Network/networkInterfaces',variables('linuxVm1NicName'))]"
             }
           ]
         },
@@ -370,11 +380,12 @@
       ]
     },
     {
+      "apiVersion": "[variables('apiVersion')]",
       "name": "[variables('windowsVm2NicName')]",
       "type": "Microsoft.Network/networkInterfaces",
       "location": "[resourceGroup().location]",
-      "apiVersion": "[variables('apiVersion')]",
       "dependsOn": [
+        "[concat('Microsoft.Network/publicIPAddresses/', variables('windowsVm2PublicIPAddressName'))]",
         "[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]"
       ],
       "tags": {
@@ -386,6 +397,10 @@
             "name": "[concat(variables('windowsVm1NicName'), 'ipconfig')]",
             "properties": {
               "privateIPAllocationMethod": "Dynamic",
+              "publicIPAddress": {
+                "id": "[resourceId('Microsoft.Network/publicIPAddresses',variables('windowsVm2PublicIPAddressName'))]"
+
+              },
               "subnet": {
                 "id": "[variables('subnetRef')]"
               }
@@ -420,7 +435,7 @@
       },
       "properties": {
         "hardwareProfile": {
-          "vmSize": ""
+          "vmSize": "[variables('vmSize')]"
         },
         "osProfile": {
           "computerName": "[variables('windowsVm2Name')]",
@@ -461,7 +476,7 @@
             "[concat('Microsoft.Compute/virtualMachines/', variables('windowsVm2Name'))]"
           ],
           "tags": {
-            "displayName": "[variables('windowsVm2Dsc')"
+            "displayName": "windowsVm2Dsc"
           },
           "properties": {
             "publisher": "Microsoft.Powershell",
@@ -472,7 +487,7 @@
             "settings": {
               "configuration": {
                 "url": "[concat(parameters('_artifactsLocation'), '/', variables('windowsVm2DscArchiveFolder'), '/', variables('windowsVm2DscArchiveFileName'))]",
-                "script": "[concat(variables('windowsVm2Dsc'), '.ps1')]",
+                "script": "windowsVm2Dsc.ps1",
                 "function": "Main"
               },
               "configurationArguments": {
@@ -492,6 +507,7 @@
       "location": "[resourceGroup().location]",
       "apiVersion": "2015-06-15",
       "dependsOn": [
+        "[concat('Microsoft.Network/publicIPAddresses/', variables('windowsVm3PublicIPAddressName'))]",
         "[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]"
       ],
       "tags": {
@@ -500,9 +516,12 @@
       "properties": {
         "ipConfigurations": [
           {
-            "name": "ipconfig1",
+            "name": "[concat(variables('windowsVm3NicName'), 'ipconfig')]",
             "properties": {
               "privateIPAllocationMethod": "Dynamic",
+              "publicIPAddress": {
+                "id": "[resourceId('Microsoft.Network/publicIPAddresses',variables('windowsVm3PublicIPAddressName'))]"
+              },
               "subnet": {
                 "id": "[variables('subnetRef')]"
               }
@@ -533,7 +552,7 @@
         "[concat('Microsoft.Network/networkInterfaces/', variables('windowsVm3NicName'))]"
       ],
       "tags": {
-        "displayName": "VM3"
+        "displayName": "[variables('windowsVm3Name')"
       },
       "properties": {
         "hardwareProfile": {
@@ -567,7 +586,41 @@
             }
           ]
         }
-      }
+      },
+        "resources": [
+            {
+                "name": "Microsoft.Powershell.DSC",
+                "type": "extensions",
+                "location": "[resourceGroup().location]",
+                "apiVersion": "2015-06-15",
+                "dependsOn": [
+                    "[concat('Microsoft.Compute/virtualMachines/', variables('windowsVm3Name'))]"
+                ],
+                "tags": {
+                    "displayName": "windowsVm3Dsc"
+                },
+                "properties": {
+                    "publisher": "Microsoft.Powershell",
+                    "type": "DSC",
+                    "typeHandlerVersion": "2.9",
+                    "autoUpgradeMinorVersion": true,
+                    "forceUpdateTag": "[parameters('windowsVm3DscUpdateTagVersion')]",
+                    "settings": {
+                      "configuration": {
+                        "url": "[concat(parameters('_artifactsLocation'), '/', variables('windowsVm3DscArchiveFolder'), '/', variables('windowsVm3DscArchiveFileName'))]",
+                        "script": "windowsVm3Dsc.ps1",
+                        "function": "Main"
+                      },
+                        "configurationArguments": {
+                            "nodeName": "[variables('windowsVm3Name')]"
+                        }
+                    },
+                    "protectedSettings": {
+                        "configurationUrlSasToken": "[parameters('_artifactsLocationSasToken')]"
+                    }
+                }
+            }
+        ]
     }
   ]
 }
