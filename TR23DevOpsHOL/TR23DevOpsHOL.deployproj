@@ -32,7 +32,7 @@
     <Content Include="Templates\azuredeploy.parameters.json" />
     <Content Include="DSC\windowsVm2Dsc.ps1" />
     <Content Include="DSC\windowsVm3Dsc.ps1" />
-    <None Include="Scripts\Deploy-AzureResourceGroup.ps1" />
+    <Content Include="Scripts\Deploy-AzureResourceGroup.ps1" />
   </ItemGroup>
   <Target Name="GetReferenceAssemblyPaths" />
 </Project>
